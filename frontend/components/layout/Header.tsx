@@ -33,7 +33,6 @@ import { getDashboardBreadcrumbs } from '@/lib/breadcrumbs';
 import { ThemeSettingsModal } from '@/components/theme/ThemeSettingsModal';
 import { TimezoneSettingsModal } from '@/components/settings/TimezoneSettingsModal';
 import { getBrowserTimeZone, isValidTimeZone } from '@/lib/utils';
-import { useOfflineStatus } from '@/components/offline/OfflineProvider';
 
 const NetworkIndicator = () => {
   const { chain, isConnected } = useAccount();
