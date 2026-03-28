@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useRouter, usePathname } from 'next/navigation';
 import { useThemeStore } from '@/store/useThemeStore';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -14,11 +15,22 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Bell, LogOut, User, Settings, Sun, Moon, Clock } from 'lucide-react';
+import { Bell, LogOut, User, Settings, Sun, Moon, Clock, CloudOff, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { useDisconnect, useAccount } from 'wagmi';
 import { web3auth } from '@/lib/web3auth';
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import { getDashboardBreadcrumbs } from '@/lib/breadcrumbs';
 import { ThemeSettingsModal } from '@/components/theme/ThemeSettingsModal';
+import { TimezoneSettingsModal } from '@/components/settings/TimezoneSettingsModal';
+import { getBrowserTimeZone, isValidTimeZone } from '@/lib/utils';
 
 const NetworkIndicator = () => {
   const { chain, isConnected } = useAccount();
@@ -57,11 +69,31 @@ const NetworkIndicator = () => {
 };
 
 export function Header() {
-  const { name, email, address, logout } = useAuthStore();
-  const { isDark, mode, toggle, setIsDark } = useThemeStore();
+  const { name, email, address, timezone, logout, setTimezone } = useAuthStore();
+  const { isDark, mode, setIsDark } = useThemeStore();
   const { disconnect } = useDisconnect();
+  const { isOnline, queueLength, isSyncing } = useOfflineStatus();
   const router = useRouter();
+  const pathname = usePathname();
+  const [breadcrumbs, setBreadcrumbs] = useState<any[]>([]);
+
+  useEffect(() => {
+    const items = getDashboardBreadcrumbs(pathname);
+    setBreadcrumbs(items);
+  }, [pathname]);
   const [themeSettingsOpen, setThemeSettingsOpen] = useState(false);
+  const [timezoneSettingsOpen, setTimezoneSettingsOpen] = useState(false);
+
+  useEffect(() => {
+    if (timezone) {
+      return;
+    }
+
+    const detectedTimeZone = getBrowserTimeZone();
+    if (detectedTimeZone && isValidTimeZone(detectedTimeZone)) {
+      setTimezone(detectedTimeZone);
+    }
+  }, [setTimezone, timezone]);
 
   const handleLogout = async () => {
     disconnect();
@@ -92,7 +124,6 @@ export function Header() {
     : 'Not connected';
 
   return (
-    <>
       <header className="sticky top-0 z-30 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700/60 transition-colors duration-700">
         <div className="flex h-16 items-center justify-between px-4 sm:px-6">
           {/* Left: Page title */}
@@ -200,9 +231,33 @@ export function Header() {
             </DropdownMenu>
           </div>
         </div>
-      </header>
+      </div>
 
+      {/* Breadcrumb Navigation */}
+      {breadcrumbs.length > 0 && (
+        <div className="border-t border-gray-100 bg-gray-50/50 px-4 sm:px-6 py-3">
+          <Breadcrumb>
+            <BreadcrumbList>
+              {breadcrumbs.map((item, index) => (
+                <div key={index} className="flex items-center gap-1.5">
+                  <BreadcrumbItem>
+                    <BreadcrumbLink href={item.href}>
+                      {item.label}
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  {index < breadcrumbs.length - 1 && <BreadcrumbSeparator />}
+                </div>
+              ))}
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
+      )}
+      </header>
       <ThemeSettingsModal open={themeSettingsOpen} onClose={() => setThemeSettingsOpen(false)} />
+      <TimezoneSettingsModal
+        open={timezoneSettingsOpen}
+        onClose={() => setTimezoneSettingsOpen(false)}
+      />
     </>
   );
 }

@@ -23,7 +23,7 @@ export function Navbar() {
 
   const navLinks = [
     { name: 'Features', href: '#features' },
-    { name: 'How It Works', href: '#how-it-works' },
+    { name: 'About', href: '#how-it-works' },
     { name: 'Pricing', href: '#pricing' },
   ];
 
@@ -71,6 +71,7 @@ export function Navbar() {
 
           {/* CTA Button & Mobile Menu Toggle */}
           <div className="flex items-center gap-4">
+            <LanguageSwitcher compact/>
             <Link href="/auth" className="hidden md:block">
               <Button
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
@@ -131,6 +132,7 @@ export function Navbar() {
                 transition={{ delay: navLinks.length * 0.1 }}
                 className="pt-4"
               >
+                <LanguageSwitcher compact />
                 <Link href="/auth" onClick={() => setIsMobileMenuOpen(false)}>
                   <Button
                     className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
