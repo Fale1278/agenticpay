@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { usePathname, useRouter } from 'next/navigation';
 import Sidebar from '@/components/layout/Sidebar';
+import { useEffect, useRef } from 'react'; // Added useRef here
 import { Header } from '@/components/layout/Header';
 import { ErrorBoundary } from '@/components/errors/ErrorBoundary';
 
