@@ -1,8 +1,6 @@
 #![no_std]
 
-use soroban_sdk::{
-    contract, contractimpl, contracttype, symbol_short, Address, BytesN, Env, String, Vec,
-};
+use soroban_sdk::{contract, contractimpl, contracttype, symbol_short, Address, BytesN, Env, String, Vec};
 
 #[contracttype]
 #[derive(Clone, Debug, PartialEq)]
@@ -416,8 +414,10 @@ impl AgenticPayContract {
             .persistent()
             .set(&DataKey::Metadata(key.clone()), &value);
 
-        env.events()
-            .publish((symbol_short!("meta"), symbol_short!("set")), (key, value));
+        env.events().publish(
+            (symbol_short!("meta"), symbol_short!("set")),
+            (key, value),
+        );
     }
 
     /// Read metadata by key
@@ -431,12 +431,12 @@ impl AgenticPayContract {
         let stored_admin = Self::get_admin(&env);
         assert!(admin == stored_admin, "Only admin can remove metadata");
 
-        env.storage()
-            .persistent()
-            .remove(&DataKey::Metadata(key.clone()));
+        env.storage().persistent().remove(&DataKey::Metadata(key.clone()));
 
-        env.events()
-            .publish((symbol_short!("meta"), symbol_short!("del")), key);
+        env.events().publish(
+            (symbol_short!("meta"), symbol_short!("del")),
+            key,
+        );
     }
     /// Upgrade the contract WASM code. Admin-only.
     ///
