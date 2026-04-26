@@ -41,6 +41,7 @@ import { SecurityMiddleware, SecurityMonitor } from './middleware/security.js';
 import { sanitizeInput, contentSecurityPolicy } from './middleware/sanitize.js';
 import { notificationsRouter } from './routes/notifications.js';
 import { auditRouter } from './routes/audit.js';
+import { hedgingRouter } from './routes/hedging.js';
 
 // Validate environment variables at startup
 validateEnv();
@@ -270,6 +271,9 @@ app.use('/api/v1/notifications', notificationsRouter);
 
 // Audit logging routes
 app.use('/api/v1/audit', auditRouter);
+
+// Currency hedging routes
+app.use('/api/v1/hedging', hedgingRouter);
 
 app.use('/api', (req: Request, res: Response, next: NextFunction) => {
   if (req.path.startsWith('/v1/')) {
