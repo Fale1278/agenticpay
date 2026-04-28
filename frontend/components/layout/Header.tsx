@@ -107,7 +107,9 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
             <Button variant="ghost" size="icon" className="lg:hidden" onClick={onMenuClick}>
               <Menu className="h-5 w-5" />
             </Button>
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
+            <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent truncate max-w-[120px] sm:max-w-none">
+              Dashboard
+            </h1>
           </div>
 
           {/* RIGHT */}
@@ -115,16 +117,16 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
             <NetworkIndicator />
             <CommandMenu />
 
-            <Button variant="ghost" size="icon">
-              <Bell className="h-5 w-5" />
+            <Button variant="ghost" size="icon" className="hidden sm:flex">
+              <Bell className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+            </Button>
+            
+            <Button variant="ghost" size="icon" className="hidden sm:flex" onClick={mode === 'manual' ? handleManualToggle : undefined}>
+              {isDark ? <Moon className="h-5 w-5 text-gray-500 dark:text-gray-400" /> : <Sun className="h-5 w-5 text-gray-500 dark:text-gray-400" />}
             </Button>
 
-            <Button variant="ghost" size="icon" onClick={mode === 'manual' ? handleManualToggle : undefined}>
-              {isDark ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
-            </Button>
-
-            <Button variant="ghost" size="icon" onClick={() => setThemeSettingsOpen(true)}>
-              <Clock className="h-5 w-5" />
+            <Button variant="ghost" size="icon" className="hidden md:flex" onClick={() => setThemeSettingsOpen(true)}>
+              <Clock className="h-5 w-5 text-gray-500 dark:text-gray-400" />
             </Button>
 
             <DropdownMenu>

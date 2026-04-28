@@ -13,8 +13,7 @@ export default function DashboardPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-1">Welcome back! Here&apos;s your overview.</p>
+          <p className="text-gray-600 mt-1 dark:text-gray-400">Welcome back! Here&apos;s your overview.</p>
         </div>
         <DashboardStatsSkeleton />
         <Card>
@@ -36,12 +35,11 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600 mt-1">Welcome back! Here&apos;s your overview.</p>
+        <p className="text-gray-600 mt-1 dark:text-gray-400">Welcome back! Here&apos;s your overview.</p>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {[{
           title: 'Total Earnings', icon: <DollarSign className="h-4 w-4 text-gray-400" />, value: stats.totalEarnings, subtitle: 'All time', color: 'text-green-600', extraIcon: <TrendingUp className="h-3 w-3" />
         }, {
@@ -91,7 +89,7 @@ export default function DashboardPage() {
             {recentActivity.length === 0 ? (
               <p className="text-gray-500 text-sm">No recent activity found.</p>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {recentActivity.map((activity, idx) => (
                   <div key={idx} className="flex items-center gap-4 p-3 bg-green-50 rounded-lg border border-green-100">
                     <CheckCircle2 className="h-5 w-5 text-green-600" />

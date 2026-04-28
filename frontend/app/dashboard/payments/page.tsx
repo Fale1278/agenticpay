@@ -33,8 +33,7 @@ export default function PaymentsPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Payment History</h1>
-          <p className="text-gray-600 mt-1">View all your payment transactions</p>
+          <p className="text-gray-600 mt-1 dark:text-gray-400">View all your payment transactions</p>
           <div className="mt-2 inline-flex items-center gap-2 text-sm text-gray-500">
             Loading payments...
           </div>
@@ -53,8 +52,7 @@ export default function PaymentsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Payment History</h1>
-          <p className="text-gray-600 mt-1">View all your payment transactions</p>
+          <p className="text-gray-600 mt-1 dark:text-gray-400">View all your payment transactions</p>
         </div>
 
         {address && (
@@ -87,11 +85,11 @@ export default function PaymentsPage() {
             >
               <Card className="hover:shadow-lg transition-all">
                 <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-4 flex-1">
                       {getStatusIcon(payment.status)}
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900">{payment.projectTitle}</h3>
+                        <h3 className="font-semibold text-gray-900 dark:text-gray-100">{payment.projectTitle}</h3>
                         <p className="text-sm text-gray-600">
                           {payment.type === 'milestone_payment' ? 'Milestone Payment' : 'Full Payment'}
                         </p>
@@ -101,14 +99,14 @@ export default function PaymentsPage() {
                       </div>
                     </div>
 
-                    <div className="text-right">
-                      <p className="text-xl font-bold text-gray-900">
+                    <div className="text-left sm:text-right">
+                      <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
                         {payment.amount} {payment.currency}
                       </p>
 
                       {payment.transactionHash && (
                         <a href={`https://testnet.cronoscan.com/tx/${payment.transactionHash}`} target="_blank" rel="noopener noreferrer"
-                          className="flex items-center gap-1 text-xs text-blue-600 hover:underline mt-2 justify-end">
+                          className="flex items-center gap-1 text-xs text-blue-600 hover:underline mt-2 justify-start sm:justify-end">
                           View on Explorer
                           <ExternalLink className="h-3 w-3" />
                         </a>

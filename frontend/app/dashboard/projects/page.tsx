@@ -26,15 +26,14 @@ export default function ProjectsPage() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Projects</h1>
-            <p className="text-gray-600 mt-1">Manage your projects and milestones</p>
+            <p className="text-gray-600 mt-1 dark:text-gray-400">Manage your projects and milestones</p>
             <div className="mt-2 inline-flex items-center gap-2 text-sm text-gray-500">
               Loading projects...
             </div>
           </div>
           <Skeleton className="h-10 w-32" />
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 sm:gap-6">
           {[1, 2, 3, 4].map((i) => (
             <ProjectCardSkeleton key={i} />
           ))}
@@ -65,8 +64,7 @@ export default function ProjectsPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Projects</h1>
-          <p className="text-gray-600 mt-1">Manage your projects and milestones</p>
+          <p className="text-gray-600 mt-1 dark:text-gray-400">Manage your projects and milestones</p>
         </div>
         <Link href="/dashboard/projects/new">
           <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
@@ -76,7 +74,7 @@ export default function ProjectsPage() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
         {projects.map((project, index) => {
           const completedMilestones = project.milestones.filter((m) => m.status === 'completed').length;
           const totalMilestones = project.milestones.length;
