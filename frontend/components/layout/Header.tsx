@@ -14,7 +14,19 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Bell, LogOut, User, Settings, Sun, Moon, Clock, Menu, Search } from 'lucide-react';
+import { 
+  Bell, 
+  LogOut, 
+  User, 
+  Settings, 
+  Sun, 
+  Moon, 
+  Clock, 
+  Menu, 
+  Search,
+  RefreshCw,
+  CloudOff
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { useDisconnect, useAccount } from 'wagmi';
 import { web3auth } from '@/lib/web3auth';
@@ -25,6 +37,7 @@ import { TimezoneSettingsModal } from '@/components/settings/TimezoneSettingsMod
 import { getBrowserTimeZone, isValidTimeZone } from '@/lib/utils';
 import { CommandMenu } from './CommandMenu';
 import { useCommandStore } from '@/store/useCommandStore';
+import { useOfflineStatus } from '@/components/offline/OfflineProvider';
 
 const NetworkIndicator = () => {
   const { chain, isConnected } = useAccount();
@@ -59,6 +72,7 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
   const { isDark, mode, setIsDark } = useThemeStore();
   const { open: openSearch } = useCommandStore();
   const { disconnect } = useDisconnect();
+  const { isOnline, queueLength, isSyncing } = useOfflineStatus();
   const router = useRouter();
   const pathname = usePathname();
   const [breadcrumbs, setBreadcrumbs] = useState<{label: string; href: string}[]>([]);
@@ -112,6 +126,23 @@ export function Header({ onMenuClick }: { onMenuClick: () => void }) {
 
           {/* RIGHT */}
           <div className="flex items-center gap-1.5 sm:gap-3">
+            {(!isOnline || queueLength > 0 || isSyncing) && (
+              <div className="hidden sm:flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-900 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800/50">
+                {isSyncing ? (
+                  <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <CloudOff className="h-3.5 w-3.5" />
+                )}
+                <span>
+                  {isSyncing
+                    ? `Syncing ${queueLength}`
+                    : !isOnline
+                      ? `Offline${queueLength > 0 ? ` - ${queueLength} queued` : ''}`
+                      : `${queueLength} queued`}
+                </span>
+              </div>
+            )}
+
             <NetworkIndicator />
             
             <div className="hidden sm:block">

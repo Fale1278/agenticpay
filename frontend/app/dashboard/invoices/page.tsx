@@ -15,20 +15,17 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { InvoiceCardSkeleton } from '@/components/ui/loading-skeletons';
 import { EmptyState } from '@/components/empty/EmptyState';
 import { formatDateInTimeZone } from '@/lib/utils';
 import { useAuthStore } from '@/store/useAuthStore';
-import { useRouter } from 'next/navigation';
 
 export default function InvoicesPage() {
   const router = useRouter();
   const { invoices, loading } = useDashboardData();
   const timezone = useAuthStore((state) => state.timezone);
-
-  const [filter, setFilter] = useState<
-    'all' | 'paid' | 'pending' | 'overdue'
-  >('all');
+  const [filter, setFilter] = useState<'all' | 'paid' | 'pending' | 'overdue'>('all');
 
   const filteredInvoices =
     filter === 'all'
