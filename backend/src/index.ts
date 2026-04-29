@@ -1,6 +1,27 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { randomUUID } from 'node:crypto';
 import express, { Request, Response, NextFunction } from 'express';
+import * as Sentry from '@sentry/node';
+import { nodeProfilingIntegration } from '@sentry/profiling-node';
+
+Sentry.init({
+  dsn: process.env.SENTRY_DSN || '',
+  integrations: [
+    nodeProfilingIntegration(),
+  ],
+  tracesSampleRate: 1.0,
+  profilesSampleRate: 1.0,
+  environment: process.env.NODE_ENV || 'development',
+  beforeSend(event, hint) {
+    if (event.exception && hint.originalException) {
+      const error = hint.originalException as Error;
+      if (error && error.message && error.message.includes('Database connection timeout')) {
+        event.fingerprint = ['database-timeout'];
+      }
+    }
+    return event;
+  }
+});
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import compression from 'compression';
@@ -14,9 +35,11 @@ import { healthRouter } from './routes/health.js';
 import { queueRouter } from './routes/queue.js';
 import { slaRouter } from './routes/sla.js';
 import { legacyRouter } from './routes/legacy.js';
+import { onboardingRouter } from './routes/onboarding.js';
 import { splitsRouter } from './routes/splits.js';
 import { refundsRouter } from './routes/refunds.js';
 import { allowancesRouter } from './routes/allowances.js';
+import { formsRouter } from './routes/forms.js';
 import { startJobs, getJobScheduler } from './jobs/index.js';
 import { errorHandler, notFoundHandler, AppError } from './middleware/errorHandler.js';
 import { messageQueue } from './services/queue.js';
@@ -35,11 +58,14 @@ import { portfolioRouter } from './routes/portfolio.js';
 import { backupRouter } from './routes/backup.js';
 import { pushRouter } from './routes/push.js';
 import { ipAllowlistRouter } from './routes/ip-allowlist.js';
-import { stripeRouter } from './routes/stripe.js';
+import { gdprRouter } from './routes/gdpr.js';
 import { ipAllowlistMiddleware, initIpAllowlist } from './middleware/ip-allowlist.js';
 import { notificationsRouter } from './routes/notifications.js';
 import { auditRouter } from './routes/audit.js';
 import { hedgingRouter } from './routes/hedging.js';
+import { complianceRouter } from './routes/compliance.js';
+import { disputeRoutes } from './disputes/index.js';
+import { disputeService } from './disputes/disputeService.js';
 import http from 'node:http';
 import { attachWebSocketServer } from './websocket/server.js';
 import { createWebSocketRouter } from './routes/websocket.js';
@@ -193,7 +219,15 @@ app.use(
     origin: config.cors.allowedOrigins,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Trace-Id', REQUEST_ID_HEADER],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Trace-Id',
+      REQUEST_ID_HEADER,
+      'API-Version',
+      'X-API-Version',
+      'Accept-Version',
+    ],
   })
 );
 app.use(express.json());
@@ -261,8 +295,8 @@ apiV1Router.use('/catalog', catalogRouter);
 apiV1Router.use('/jobs', jobsRouter);
 apiV1Router.use('/queue', queueRouter);
 apiV1Router.use('/sla', slaRouter);
+apiV1Router.use('/onboarding', onboardingRouter);
 apiV1Router.use('/legacy', legacyRouter);
-// Feature flag admin — inspect & override flags at runtime
 apiV1Router.use('/flags', flagsRouter);
 apiV1Router.use('/kyb', kybRouter);
 apiV1Router.use('/batch', batchRouter);
@@ -271,37 +305,21 @@ apiV1Router.use('/queue/payments', paymentQueueRouter);
 apiV1Router.use('/splits', splitsRouter);
 apiV1Router.use('/refunds', refundsRouter);
 apiV1Router.use('/allowances', allowancesRouter);
-// Email delivery system
+apiV1Router.use('/forms', formsRouter);
+apiV1Router.use('/disputes', disputeRoutes);
 apiV1Router.use('/emails', emailRouter);
-// Portfolio/wallet aggregation
 apiV1Router.use('/portfolio', portfolioRouter);
-// Backup system
 apiV1Router.use('/backup', backupRouter);
-// IP allowlist management
 apiV1Router.use('/ip-allowlist', ipAllowlistRouter);
-// Push notifications
 apiV1Router.use('/push', pushRouter);
-// Stripe card payments
-apiV1Router.use('/stripe', stripeRouter);
-apiV1Router.use('/webhooks', webhooksRouter);
-apiV1Router.use('/fraud-detection', fraudDetectionRouter);
-apiV1Router.use('/bridge', bridgeRouter);
-apiV1Router.use('/tokenization', tokenizationRouter);
-apiV1Router.use('/escrow', escrowRouter);
-apiV1Router.use('/multisig', multisigRouter);
+// GDPR data subject rights
+apiV1Router.use('/gdpr', gdprRouter);
 
 app.use('/api/v1', ipAllowlistMiddleware(), apiV1Router);
 
-// Notification system routes
 app.use('/api/v1/notifications', notificationsRouter);
-
-// Audit logging routes
 app.use('/api/v1/audit', auditRouter);
-
-// Currency hedging routes
 app.use('/api/v1/hedging', hedgingRouter);
-
-// SOC 2 / compliance evidence endpoints
 app.use('/api/v1/compliance', complianceRouter);
 
 // Payment receipt NFTs
@@ -342,6 +360,9 @@ app.use('/api', (req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use(notFoundHandler);
+
+Sentry.setupExpressErrorHandler(app);
+
 app.use(errorHandler);
 
 if (config.jobs.enabled) {
@@ -354,6 +375,12 @@ if (config.queue.enabled) {
   paymentQueue.start();
 }
 startWebhookWorker();
+
+// Auto-escalation cron
+setInterval(async () => {
+  const count = await disputeService.processEscalations();
+  if (count > 0) console.log(`Escalated ${count} disputes`);
+}, 5 * 60 * 1000);
 
 const server = http.createServer(app);
 const wsServer = attachWebSocketServer({ server, options: { path: '/ws' } });
